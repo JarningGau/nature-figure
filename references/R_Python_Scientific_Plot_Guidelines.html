@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>R/Python Scientific Plot Guidelines</title>
+</head>
+
+<body>
+
+    <h1>R/Python Scientific Plot Guidelines</h1>
+
+    <p>
+        This guide is for an agent generating scientific plots using R or Python.
+        All final figure files must be saved as PDF only.
+    </p>
+
+    <h2>1. Required Output Format</h2>
+
+    <ul>
+        <li>Save every final figure as <b>PDF</b>.</li>
+        <li>Do not save or return EPS, AI, PPT, PPTX, PNG, JPG, JPEG, TIFF, TIF, BMP, GIF, GIMP or Tex as the final
+            figure.</li>
+        <li>Use vector PDF for graphs, charts, scatter plots, line plots, bar plots, boxplots, histograms and
+            schematics.</li>
+        <li>Keep text editable/selectable in the PDF.</li>
+        <li>Do not convert text to outlines, curves or paths.</li>
+        <li>Do not add drop shadows, 3D effects, bevels, glows or decorative raster effects.</li>
+        <li>Exception: dense scatter plots may use an internally rasterized point layer, but the final delivered file
+            must still be PDF.</li>
+    </ul>
+
+    <h2>2. Figure Size</h2>
+
+    <p>Create the figure at its final publication width. Do not enlarge or shrink the figure after export.</p>
+
+    <table border="1">
+        <tr>
+            <th>Journal type</th>
+            <th>1-column width</th>
+            <th>2-column width</th>
+        </tr>
+        <tr>
+            <td>Nature Research Journals</td>
+            <td>88 mm</td>
+            <td>180 mm</td>
+        </tr>
+        <tr>
+            <td>All other journals</td>
+            <td>85 mm</td>
+            <td>175 mm</td>
+        </tr>
+    </table>
+
+    <p>Convert millimetres to inches using:</p>
+
+    <pre><code>inches = mm / 25.4</code></pre>
+
+    <table border="1">
+        <tr>
+            <th>Width</th>
+            <th>Inches</th>
+        </tr>
+        <tr>
+            <td>88 mm</td>
+            <td>3.4646 in</td>
+        </tr>
+        <tr>
+            <td>180 mm</td>
+            <td>7.0866 in</td>
+        </tr>
+        <tr>
+            <td>85 mm</td>
+            <td>3.3465 in</td>
+        </tr>
+        <tr>
+            <td>175 mm</td>
+            <td>6.8898 in</td>
+        </tr>
+    </table>
+
+    <p>
+        If the target journal is unknown, use 85 mm for a 1-column figure and 175 mm for a 2-column figure.
+    </p>
+
+    <h2>3. Text Rules</h2>
+
+    <ul>
+        <li>All text must use a sans-serif font.</li>
+        <li>Prefer Helvetica or Arial.</li>
+        <li>If Helvetica or Arial is unavailable, use another sans-serif font.</li>
+        <li>Maximum text size: 7 pt.</li>
+        <li>Minimum text size: 5 pt.</li>
+        <li>A practical default is 6 pt for labels and titles, and 5 pt for tick labels and legends.</li>
+    </ul>
+
+    <p>Convert points to inches using:</p>
+
+    <pre><code>inches = points / 72</code></pre>
+
+    <p>
+        In Python and R, font size arguments are normally interpreted as points, so manual conversion is usually not
+        needed.
+    </p>
+
+    <h2>4. Colour Rules</h2>
+
+    <ul>
+        <li>Use RGB colour mode.</li>
+        <li>Do not export CMYK PDFs unless specifically requested.</li>
+        <li>Use clear, flat colours.</li>
+        <li>Avoid gradients unless scientifically necessary and readable at 5-7 pt text size.</li>
+    </ul>
+
+    <h2>5. Raster Image Rule</h2>
+
+    <p>
+        If a figure contains photographs, microscopy images, gel images, blot images or other raster data, the source
+        raster image should be at least 300 dpi at the size used in the figure.
+    </p>
+
+    <ul>
+        <li>Do not artificially upscale low-resolution images.</li>
+        <li>Do not export the final figure as PNG, JPG or TIFF.</li>
+        <li>Embed the raster image into the plot and save the final figure as PDF.</li>
+    </ul>
+
+    <h2>6. Dense Scatter Plot Rule</h2>
+
+    <p>
+        For scatter plots with many points, avoid generating one vector object per dot. This can create very large PDF
+        files and slow down rendering.
+    </p>
+
+    <ul>
+        <li>If a scatter plot contains more than 100 plotted points, consider rasterizing the point layer.</li>
+        <li>Do not create a separate vectorized element for each dot.</li>
+        <li>Rasterize only the point cloud, not the whole figure.</li>
+        <li>Keep axes, axis labels, tick labels, title, legend, annotations, trend lines, error bars, confidence bands
+            and panel labels as vector objects whenever possible.</li>
+        <li>Use at least 300 dpi for the rasterized point layer.</li>
+        <li>The final file must still be PDF.</li>
+        <li>Do not output a separate PNG, JPG or TIFF as the final figure.</li>
+        <li>If the number of points is 100 or fewer, vector points are acceptable.</li>
+        <li>If points heavily overlap, also consider smaller marker size, transparency, hexbin plots, 2D density plots
+            or summary statistics instead of drawing every point as a separate vector marker.</li>
+    </ul>
+
+    <table border="1">
+        <tr>
+            <th>Scatter point count</th>
+            <th>Recommended treatment</th>
+        </tr>
+        <tr>
+            <td>&lt;= 100 points</td>
+            <td>Vector points are acceptable.</td>
+        </tr>
+        <tr>
+            <td>&gt; 100 points</td>
+            <td>Rasterize the point layer at 300 dpi or higher; keep the rest of the figure vector.</td>
+        </tr>
+    </table>
+
+    <h2>7. Multi-Panel Figures</h2>
+
+    <ul>
+        <li>Assemble multi-panel figures inside Python or R when possible.</li>
+        <li>Export the complete final figure as one PDF file.</li>
+        <li>Keep panel labels, axes, lines, arrows, boxes and scale bars as vector text or vector graphics.</li>
+        <li>If a panel contains a dense scatter plot, rasterize only that point layer.</li>
+        <li>Try to keep the final PDF under 50 MB.</li>
+    </ul>
+
+    <hr>
+
+    <h2>8. Python/Matplotlib Template</h2>
+
+    <p>
+        Use this pattern for Python plots. Save only as PDF. For scatter plots with more than 100 points, set
+        <code>rasterized=True</code> on the point layer.
+    </p>
+
+    <pre><code>import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Choose target width in mm
+column_width_mm = 85       # Default 1-column width for non-Nature journals
+# column_width_mm = 88     # Nature Research 1-column
+# column_width_mm = 175    # Default 2-column width for non-Nature journals
+# column_width_mm = 180    # Nature Research 2-column
+
+figure_height_mm = 70      # Adjust as needed
+
+# Convert mm to inches
+fig_width_in = column_width_mm / 25.4
+fig_height_in = figure_height_mm / 25.4
+
+mpl.rcParams.update({
+    # Sans-serif font, preferably Helvetica or Arial
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+
+    # Keep text between 5 pt and 7 pt
+    "font.size": 6,
+    "axes.titlesize": 6,
+    "axes.labelsize": 6,
+    "xtick.labelsize": 5,
+    "ytick.labelsize": 5,
+    "legend.fontsize": 5,
+    "figure.titlesize": 6,
+
+    # Keep text editable/selectable in PDF
+    "pdf.fonttype": 42,
+
+    # Useful saving behaviour
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+
+    # Affects rasterized artists and embedded raster images
+    "savefig.dpi": 300
+})
+
+# Example data
+n_points = 500
+
+# Rasterize point layer if there are too many points
+rasterize_points = n_points > 100
+
+rng = np.random.default_rng(1)
+x = rng.normal(size=n_points)
+y = rng.normal(size=n_points)
+
+# Example plot
+fig, ax = plt.subplots(
+    figsize=(fig_width_in, fig_height_in),
+    constrained_layout=True
+)
+
+# Scatter points
+# If n_points > 100, rasterized=True prevents each dot from becoming a separate vector object in the PDF.
+ax.scatter(
+    x,
+    y,
+    s=8,
+    alpha=0.7,
+    linewidths=0,
+    edgecolors="none",
+    rasterized=rasterize_points
+)
+
+# Optional trend line: keep this vectorized
+coefficients = np.polyfit(x, y, 1)
+x_sorted = np.sort(x)
+y_fit = np.polyval(coefficients, x_sorted)
+
+ax.plot(
+    x_sorted,
+    y_fit,
+    color="black",
+    linewidth=0.8,
+    rasterized=False
+)
+
+ax.set_xlabel("Time")
+ax.set_ylabel("Response")
+ax.set_title("Example figure")
+
+# Save final figure as PDF only
+fig.savefig("figure1.pdf")
+</code></pre>
+
+    <h3>Python Notes</h3>
+
+    <ul>
+        <li>Use <code>fig.savefig("figure1.pdf")</code>.</li>
+        <li>Do not use <code>fig.savefig("figure1.png")</code>, <code>jpg</code>, <code>eps</code>, <code>tiff</code> or
+            other formats for final submission.</li>
+        <li>Set <code>pdf.fonttype = 42</code> so text remains editable/selectable.</li>
+        <li>Use <code>rasterized=True</code> only on the scatter point layer when <code>n_points > 100</code>.</li>
+        <li>Keep axes, labels, legends, trend lines and annotations vectorized by leaving <code>rasterized=False</code>
+            or not setting it.</li>
+        <li>If using Seaborn, configure Matplotlib after setting the Seaborn theme.</li>
+    </ul>
+
+    <pre><code>import seaborn as sns
+
+sns.set_theme(style="whitegrid", rc=mpl.rcParams)
+</code></pre>
+
+    <hr>
+
+    <h2>9. R/ggplot2 Template</h2>
+
+    <p>
+        Use this pattern for R plots. Save only as PDF. For scatter plots with more than 100 points, use
+        <code>ggrastr::geom_point_rast()</code> to rasterize the point layer while keeping the rest of the figure
+        vector.
+    </p>
+
+    <pre><code>library(ggplot2)
+
+# Required for rasterizing dense scatter points:
+# install.packages("ggrastr")
+library(ggrastr)
+
+# Choose target width in mm
+column_width_mm &lt;- 85      # Default 1-column width for non-Nature journals
+# column_width_mm &lt;- 88    # Nature Research 1-column
+# column_width_mm &lt;- 175   # Default 2-column width for non-Nature journals
+# column_width_mm &lt;- 180   # Nature Research 2-column
+
+figure_height_mm &lt;- 70     # Adjust as needed
+
+# Convert mm to inches
+fig_width_in &lt;- column_width_mm / 25.4
+fig_height_in &lt;- figure_height_mm / 25.4
+
+# Example data
+n_points &lt;- 500
+
+set.seed(1)
+df &lt;- data.frame(
+    x = rnorm(n_points),
+    y = rnorm(n_points)
+)
+
+# Set a compact theme with text between 5 pt and 7 pt
+theme_set(
+  theme_classic(base_size = 6, base_family = "Arial") +
+    theme(
+      text = element_text(size = 6, family = "Arial"),
+      title = element_text(size = 6),
+      plot.title = element_text(size = 6),
+      plot.subtitle = element_text(size = 5),
+      plot.caption = element_text(size = 5),
+      axis.title = element_text(size = 6),
+      axis.text = element_text(size = 5),
+      legend.title = element_text(size = 6),
+      legend.text = element_text(size = 5),
+      strip.text = element_text(size = 6),
+      panel.grid.minor = element_blank()
+    )
+)
+
+# Base plot without points
+p &lt;- ggplot(df, aes(x = x, y = y)) +
+  labs(
+    title = "Example figure",
+    x = "Time",
+    y = "Response"
+  )
+
+# Add points
+# If n_points > 100, rasterize the point layer.
+if (n_points > 100) {
+  p &lt;- p +
+    geom_point_rast(
+      size = 0.5,
+      alpha = 0.7,
+      dpi = 300
+    )
+} else {
+  p &lt;- p +
+    geom_point(
+      size = 0.5,
+      alpha = 0.7
+    )
+}
+
+# Optional trend line: keep this vectorized
+p &lt;- p +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linewidth = 0.5,
+    color = "black"
+  )
+
+# Save final figure as PDF only
+ggsave(
+  filename = "figure1.pdf",
+  plot = p,
+  width = fig_width_in,
+  height = fig_height_in,
+  units = "in",
+  device = cairo_pdf,
+  limitsize = FALSE
+)
+</code></pre>
+
+    <h3>R Notes</h3>
+
+    <ul>
+        <li>Use <code>ggsave(filename = "figure1.pdf", device = cairo_pdf)</code>.</li>
+        <li>Do not use <code>postscript()</code>, <code>png()</code>, <code>jpeg()</code>, <code>tiff()</code> or other
+            final output devices.</li>
+        <li>Use Arial or Helvetica if available.</li>
+        <li>If Arial is unavailable, use another sans-serif font.</li>
+        <li>For dense scatter plots, use <code>ggrastr::geom_point_rast()</code> instead of <code>geom_point()</code>
+            when <code>n_points > 100</code>.</li>
+        <li>Keep trend lines, axes, labels and legends vectorized.</li>
+        <li>Check that the PDF text is selectable and not converted to outlines.</li>
+    </ul>
+
+    <hr>
+
+    <h2>10. Final QC Checklist for the Agent</h2>
+
+    <h3>Format</h3>
+    <ul>
+        <li>Final file is PDF.</li>
+        <li>No EPS, AI, PPT, PNG, JPG, TIFF, BMP, GIF, GIMP or Tex file is produced as the final figure.</li>
+        <li>Text is editable/selectable in the PDF.</li>
+        <li>Lines, axes, labels and legends are vector objects.</li>
+    </ul>
+
+    <h3>Size</h3>
+    <ul>
+        <li>1-column width is 85 mm, or 88 mm for Nature Research Journals.</li>
+        <li>2-column width is 175 mm, or 180 mm for Nature Research Journals.</li>
+        <li>The figure is created at final size, not resized afterwards.</li>
+    </ul>
+
+    <h3>Text</h3>
+    <ul>
+        <li>All text is sans-serif.</li>
+        <li>Helvetica or Arial is used when available.</li>
+        <li>All text is between 5 pt and 7 pt.</li>
+    </ul>
+
+    <h3>Colour</h3>
+    <ul>
+        <li>The figure uses RGB colour.</li>
+        <li>No CMYK PDF is generated.</li>
+    </ul>
+
+    <h3>Scatter plots</h3>
+    <ul>
+        <li>If the scatter plot has more than 100 points, the point layer is rasterized.</li>
+        <li>The PDF does not contain one separate vector object per dot.</li>
+        <li>Axes, labels, legends, trend lines and annotations remain vectorized.</li>
+        <li>Rasterized point layers are created at 300 dpi or higher.</li>
+        <li>The final delivered file is still PDF only.</li>
+    </ul>
+
+    <h3>Effects</h3>
+    <ul>
+        <li>No drop shadows.</li>
+        <li>No 3D rotation.</li>
+        <li>No bevels.</li>
+        <li>No glow effects.</li>
+        <li>No low-resolution screenshots or pasted raster graphics.</li>
+    </ul>
+
+    <h3>File size</h3>
+    <ul>
+        <li>The final PDF is preferably under 50 MB.</li>
+    </ul>
+
+</body>
+
+</html>
