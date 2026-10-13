@@ -1,13 +1,13 @@
 ---
 name: create-nature-figure
 description: >-
-  Restyle existing matplotlib, seaborn, and ggplot2 code to Nature publication
-  format: column width in millimetres, 5–7 pt Arial or Helvetica, RGB, one
-  vector PDF with selectable text, and rasterized dense scatter layers. Use
-  when the user asks to apply Nature figure style, match Nature Research
-  sizing, or fix figure fonts, themes, or PDF export in Python or R. Does not
-  create plots, choose chart types, or write figure files — only refine
-  plotting style and export format in existing code.
+  Restyles existing matplotlib, seaborn, and ggplot2 code to Nature publication
+  format using bundled Python and R themes: column width in millimetres, 5–7 pt
+  Arial or Helvetica, RGB, one vector PDF with selectable text, and rasterized
+  dense scatter layers. Use when the user asks to apply Nature figure style,
+  match Nature Research sizing, or fix figure fonts, themes, or PDF export in
+  Python or R. Does not create plots, choose chart types, or write figure
+  files; it only refines plotting style and export format in existing code.
 ---
 
 # Create Nature Figure Style
@@ -16,12 +16,44 @@ This skill does not generate actual plots. It only refines the plotting style an
 
 Edit theme, type, size, colour mode, line weights, and the PDF export in plotting code the user already has. Leave the scientific figure alone.
 
+## Bundled themes
+
+| File | Language | Provides |
+| --- | --- | --- |
+| [scripts/theme_nature.py](scripts/theme_nature.py) | Python | `apply_theme()`, `style_axes(ax)`, `save_nature_pdf(fig, path)`, `NATURE_W1_IN`, `NATURE_W2_IN` |
+| [scripts/theme_nature.R](scripts/theme_nature.R) | R | `theme_nature()` (set as the default), `save_nature_pdf(plot, file, width, height)`, `NATURE_W1`, `NATURE_W2` |
+
+Both themes use the same type sizes, 0.5 pt black lines, no grid, and open axes (no top or right spine). Treat them as the single source of truth for style values; do not copy their settings into the user's script.
+
+Install: copy this folder to `~/.cursor/skills/` (all projects) or `<project>/.cursor/skills/` (one project).
+
+Apply to the user's script (paths relative to this folder; copy the file next to the script if the skill folder is not reachable):
+
+```python
+import sys
+sys.path.insert(0, "<skill>/scripts")
+import theme_nature as tn
+
+tn.apply_theme()          # after any seaborn theme
+# ... existing plotting code, figsize from the Size table ...
+tn.style_axes(ax)         # each axes the script already creates
+tn.save_nature_pdf(fig, "figure.pdf")
+```
+
+```r
+source("<skill>/scripts/theme_nature.R")   # sets theme_nature() globally
+# ... existing plotting code ...
+save_nature_pdf(p, "figure.pdf", width = NATURE_W1, height = fig_height_in)
+```
+
+If the script already defines its own theme or `rcParams`, replace those style settings with the bundled theme and keep the user's palette, data, geoms, and layout. Load the theme once; do not leave conflicting settings behind.
+
 ## Do not
 
 - Choose a chart type, geom, or statistic.
 - Add layers, annotations, legends, panels, or trend lines.
 - Invent, load, subset, or reshape data.
-- Write a new script that draws a figure.
+- Write a new script that draws a figure. Adding the theme import or `source` line and the export call to an existing script is allowed.
 - Run the script or save a PDF, PNG, or any other figure file.
 - Change mappings (`x`, `y`, `fill`, `colour`), axis meanings, limits that encode the data, category order, label wording, or existing colour encodings.
 - Resize the figure after export, or add `bbox_inches="tight"` / `coord_fixed` cropping that changes the publication size.
@@ -39,7 +71,7 @@ When an R script and a Python script draw the same figure, apply the same width,
 | Nature Research | 88 mm | 180 mm |
 | Other, or unknown | 85 mm | 175 mm |
 
-Default to Nature Research (88 mm / 180 mm) unless the user names another journal.
+Default to Nature Research (88 mm / 180 mm) unless the user names another journal. The bundled constants use the Nature Research widths; for another journal compute `mm / 25.4` directly.
 
 Column width is the whole figure, not one panel. Keep a stated panel width when it is already under the column limit. If the script uses a library default or is wider than the column, set the width to the column width and scale the height so the current aspect ratio stays the same. The finished figure stays under the 2-column width. Draw it at that size. Do not scale it later.
 
@@ -50,7 +82,7 @@ Column width is the whole figure, not one panel. Keep a stated panel width when 
 - RGB, flat colours. Use a gradient only when it is scientifically necessary and still readable at this text size. Do not export CMYK.
 - Keep the user's existing palette. Do not recolour a series to "look more Nature".
 - No drop shadows, 3D effects, bevels, glows, or outlined text.
-- White background. No grid. Black spines and tick marks, about 0.5 pt. Tick length about 1.5–2 pt. Legend frame off. Do not add a legend that is not already there.
+- White background. No grid. Black axis lines and tick marks, about 0.5 pt. No top or right spine. Tick length about 1.5–2 pt. Legend frame off. Do not add a legend that is not already there.
 
 ## Raster content
 
@@ -67,100 +99,22 @@ Axes, labels, legends, annotations, trend lines, error bars, and confidence band
 
 ## Python
 
-Apply this after any seaborn theme. Seaborn must not overwrite these settings.
+`theme_nature.apply_theme()` sets fonts, `pdf.fonttype` 42, `savefig.dpi` 600 (minimum 300), line widths, colours, and the legend frame. Seaborn must not overwrite it, so call it after any `sns.set_theme(...)`.
 
-```python
-import matplotlib as mpl
+In the existing script:
 
-mpl.rcParams.update(
-    {
-        "font.family": "sans-serif",
-        "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
-        "font.size": 6,
-        "axes.titlesize": 6,
-        "axes.labelsize": 6,
-        "xtick.labelsize": 5,
-        "ytick.labelsize": 5,
-        "legend.fontsize": 5,
-        "figure.titlesize": 6,
-        "pdf.fonttype": 42,
-        "ps.fonttype": 42,
-        "savefig.dpi": 300,
-        "axes.linewidth": 0.5,
-        "axes.edgecolor": "black",
-        "axes.labelcolor": "black",
-        "axes.facecolor": "white",
-        "axes.grid": False,
-        "figure.facecolor": "white",
-        "text.color": "black",
-        "xtick.color": "black",
-        "ytick.color": "black",
-        "xtick.major.width": 0.5,
-        "ytick.major.width": 0.5,
-        "xtick.major.size": 2,
-        "ytick.major.size": 2,
-        "legend.frameon": False,
-    }
-)
-```
-
-On each axes that the script already creates:
-
-- `set_axisbelow(False)`, `grid(False)`, `set_facecolor("white")`.
-- Spines: linewidth `0.5`, colour black.
-- `tick_params(colors="black", width=0.5, length=2, pad=1)`.
-- Pass `fontsize=6` for titles and axis titles, `fontsize=5` for tick labels and legends, when those texts already exist.
-- `fig.savefig("figure.pdf")` only. `pdf.fonttype` is 42 and `savefig.dpi` is 300. No PNG, JPG, EPS, TIFF, or SVG as the delivered file.
+- Call `style_axes(ax)` on each axes it already creates. Pass `fontsize=6` for existing titles and axis titles, and `fontsize=5` for existing tick labels and legends, when the script sets sizes explicitly.
+- `save_nature_pdf(fig, "figure.pdf")` (or `fig.savefig("figure.pdf")`) only. No PNG, JPG, EPS, TIFF, or SVG as the delivered file.
 - `rasterized=True` only on the existing scatter layer when that layer has more than 100 points. Leave every other artist at the default `rasterized=False`.
 - Set `figsize` in inches from the millimetre width and height above. Prefer the script's existing layout engine (`constrained_layout` or subplots). Do not add `bbox_inches="tight"`.
 
 ## R
 
-`base_family = "Arial"`, `base_size = 6`. Merge this into the existing `theme()`; do not replace geoms.
+`theme_nature()` uses `base_family = "Arial"` and `base_size = 6`, and is installed as the default by `source()`. If the script already builds a `theme()`, keep its non-style arguments (for example an existing `legend.position`); do not replace geoms. If the script had no legend theme, do not invent one.
 
-```r
-theme_bw(base_size = 6, base_family = "Arial") +
-  theme(
-    panel.grid = element_blank(),
-    plot.title = element_text(size = 6),
-    axis.title = element_text(size = 6),
-    axis.text = element_text(color = "black", size = 5),
-    axis.text.x = element_text(margin = margin(t = 1, unit = "pt")),
-    axis.text.y = element_text(margin = margin(r = 1, unit = "pt")),
-    axis.ticks.length = unit(1.5, "pt"),
-    legend.text = element_text(size = 5),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
-    strip.text = element_text(size = 6),
-    plot.subtitle = element_text(size = 5),
-    plot.caption = element_text(size = 5)
-  )
-```
+Export with `save_nature_pdf()`, which writes SVG with `svglite` and then converts with `rsvg::rsvg_pdf`. `cairo_pdf` embeds Arial but inserts bad per-glyph offsets and splits words. Do not use `cairo_pdf`, `pdf()`, `postscript()`, `png()`, `jpeg()`, or `tiff()` for the final file.
 
-Keep an existing `legend.position`. If the script had no legend theme, do not invent one.
-
-Export:
-
-```r
-library(svglite)
-library(rsvg)
-
-svg_tmp <- tempfile(fileext = ".svg")
-on.exit(unlink(svg_tmp), add = TRUE)
-ggsave(
-  filename = svg_tmp,
-  plot = p,
-  width = fig_width_in,
-  height = fig_height_in,
-  units = "in",
-  device = svglite
-)
-rsvg_pdf(svg_tmp, file = "figure.pdf")
-```
-
-Write SVG with `svglite`, then `rsvg::rsvg_pdf`. `cairo_pdf` embeds Arial but inserts bad per-glyph offsets and splits words. Do not use `cairo_pdf`, `pdf()`, `postscript()`, `png()`, `jpeg()`, or `tiff()` for the final file.
-
-For more than 100 points, rasterize only the point layer at 300 dpi (`ggrastr::geom_point_rast`). Keep `geom_line`, `geom_smooth`, `geom_errorbar`, and text geoms as vector.
+For more than 100 points, rasterize only the point layer at 300 dpi or more (`ggrastr::geom_point_rast`). Keep `geom_line`, `geom_smooth`, `geom_errorbar`, and text geoms as vector.
 
 ## Multi-panel figures
 
@@ -170,9 +124,10 @@ If the script already assembles panels, restyle each panel and keep a single PDF
 
 Confirm in the diff, without rendering:
 
+- The bundled theme is imported or sourced once, with no conflicting `rcParams` or `theme()` settings left behind.
 - Final device is one PDF. Text is selectable (`pdf.fonttype` 42 in Python; `svglite` then `rsvg_pdf` in R).
 - Width is the journal column, or an existing smaller panel width. Height keeps the previous aspect ratio. No tight bounding box.
 - Type is Arial or Helvetica, 5–7 pt, with the 6 pt / 5 pt defaults.
-- Grid is off. No shadows, 3D, bevels, or glows.
+- Grid is off, no top or right spine. No shadows, 3D, bevels, or glows.
 - Scatter `rasterized` / `geom_point_rast` is set only when that layer has more than 100 points.
 - Data, geoms, stats, mappings, and label wording are unchanged.
